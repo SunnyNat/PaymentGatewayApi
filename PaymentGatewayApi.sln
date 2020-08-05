@@ -5,13 +5,11 @@ VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentGatewayApi", "PaymentGatewayApi\PaymentGatewayApi.csproj", "{34B344E4-71CE-4A1E-A3EE-79D1548A3807}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentGatewayApi.Models", "PaymentGatewayApi.Models\PaymentGatewayApi.Models.csproj", "{ADD06BF4-0839-4559-A7FE-55A527DD883C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentGatewayApi.Models", "PaymentGatewayApi.Models\PaymentGatewayApi.Models.csproj", "{ADD06BF4-0839-4559-A7FE-55A527DD883C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentGatewayApi.DataLayer", "PaymentGatewayApi.DataLayer\PaymentGatewayApi.DataLayer.csproj", "{30E9B2A0-FB0C-4936-9F68-4A8CE2CECE8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentGatewayApi.DataLayer", "PaymentGatewayApi.DataLayer\PaymentGatewayApi.DataLayer.csproj", "{30E9B2A0-FB0C-4936-9F68-4A8CE2CECE8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentGatewayApi.Service", "PaymentGatewayApi.Service\PaymentGatewayApi.Service.csproj", "{9B034E93-1631-48B8-8BAF-3909FD57FB30}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentGatewayApi.Authentication", "PaymentGatewayApi.Authentication\PaymentGatewayApi.Authentication.csproj", "{CD5A1A9E-5A79-41CD-9427-630F68CC2CA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentGatewayApi.Service", "PaymentGatewayApi.Service\PaymentGatewayApi.Service.csproj", "{9B034E93-1631-48B8-8BAF-3909FD57FB30}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +33,6 @@ Global
 		{9B034E93-1631-48B8-8BAF-3909FD57FB30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B034E93-1631-48B8-8BAF-3909FD57FB30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B034E93-1631-48B8-8BAF-3909FD57FB30}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD5A1A9E-5A79-41CD-9427-630F68CC2CA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD5A1A9E-5A79-41CD-9427-630F68CC2CA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD5A1A9E-5A79-41CD-9427-630F68CC2CA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD5A1A9E-5A79-41CD-9427-630F68CC2CA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

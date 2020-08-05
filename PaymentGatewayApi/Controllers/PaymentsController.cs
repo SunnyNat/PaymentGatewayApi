@@ -1,43 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Security.Claims;
 using System.Threading.Tasks;
+using CreditCardValidator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using PaymentGatewayApi.DataLayer;
 using PaymentGatewayApi.Models;
 using PaymentGatewayApi.Models.DTOs;
 using PaymentGatewayApi.Service;
 
 namespace PaymentGatewayApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
+    [Produces("application/json")]
     public class PaymentsController : ControllerBase
     {
         private UserManager<Merchant> _userManager;
-        private SignInManager<Merchant> _signInManager;
         private PaymentUtils _paymentUtils;
         private readonly IOptions<ApplicationSettings> _options;
 
-        public PaymentsController(UserManager<Merchant> userManager, SignInManager<Merchant> signInManager, IOptions<ApplicationSettings> options, PaymentUtils paymentUtils)
+        public PaymentsController(UserManager<Merchant> userManager, IOptions<ApplicationSettings> options, IPaymentRepository repository, IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _options = options;
-            _paymentUtils = paymentUtils;
-
+            _paymentUtils = new PaymentUtils(repository, unitOfWork);
         }
 
         [HttpPost]
         [Route("Post")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         //POST: /api/Payments/Post
-        public async Task<Object> Post([FromBody] PaymentDetailsDto paymentDetailsDto)
+        public async Task<ActionResult<BankResponseDto>> Post([FromBody] PaymentRequestDto paymentRequestDto)
         {
-            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
-            BankResponseDto bankResponseDto = _paymentUtils.PostPayment(paymentDetailsDto, currentUser, _options.Value.BankUrl);
+
+            CardValidation cardValidation = new CardValidation(paymentRequestDto.Card);
+            if (!cardValidation.IsValid)
+            {
+                return BadRequest(new { message = "Card data is incorrect." });
+            }
+
+            ClaimsPrincipal currentUser = this.User;
+            var currentUserName = currentUser.FindFirst("login").Value;
+            var user = await _userManager.FindByNameAsync(currentUserName);
+
+            BankResponseDto bankResponseDto = await _paymentUtils.PostPayment(paymentRequestDto, user, _options.Value.BankUrl);
 
             if (bankResponseDto != null)
             {
@@ -45,25 +57,42 @@ namespace PaymentGatewayApi.Controllers
             }
             else
             {
-                return new NotFoundObjectResult(bankResponseDto);
+                return NotFound(new { message = "Bank could not process the request" });
             }
         }
 
         [HttpGet]
         [Route("Get/{paymentIdentifier}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         //GET: /api/Payments/Get/{paymentIdentifier}
-        public ObjectResult Get([FromRoute] string paymentIdentifier) //metoda post działa
+        public async Task<ActionResult<PaymentDetailsDto>> Get([FromRoute] string paymentIdentifier)
         {
-            PaymentDetailsDto paymentDetailsDto = _paymentUtils.GetPaymentDetails(paymentIdentifier);
+            ClaimsPrincipal currentUser = this.User;
+            var currentUserName = currentUser.FindFirst("login").Value;
+            var user = await _userManager.FindByNameAsync(currentUserName);
 
-            if(paymentDetailsDto != null)
+            PaymentDetailsDto paymentDetailsDto = await _paymentUtils.GetPaymentDetails(paymentIdentifier, user);
+
+            if (paymentDetailsDto != null)
             {
                 return Ok(paymentDetailsDto);
             }
             else
             {
-                return new NotFoundObjectResult(paymentDetailsDto);
+                return NotFound(new { message = "Payment with given identifier was not found." });
             }
         }
+
+        [HttpGet]
+        [Route("Get/RandomCardNumber")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        //GET: /api/Payments/Get/RandomCardNumber
+        public ActionResult<string> GetRandomVisaNumber()
+        {
+            string visaNumber = CreditCardFactory.RandomCardNumber(CardIssuer.Visa);
+            return Ok(new { visaNumber });
+        }
+    
     }
 }

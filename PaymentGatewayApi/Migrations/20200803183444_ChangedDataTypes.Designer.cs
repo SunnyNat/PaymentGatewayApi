@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PaymentGatewayApi.DataLayer;
 
 namespace PaymentGatewayApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200803183444_ChangedDataTypes")]
+    partial class ChangedDataTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,6 +152,27 @@ namespace PaymentGatewayApi.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("PaymentGatewayApi.Models.BankResponse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Identifier")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BankResponses");
+                });
+
             modelBuilder.Entity("PaymentGatewayApi.Models.Card", b =>
                 {
                     b.Property<int>("Id")
@@ -253,6 +276,9 @@ namespace PaymentGatewayApi.Migrations
                     b.Property<double>("Amount")
                         .HasColumnType("float");
 
+                    b.Property<int?>("BankResponseId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("CardId")
                         .HasColumnType("int");
 
@@ -268,10 +294,9 @@ namespace PaymentGatewayApi.Migrations
                     b.Property<string>("MerchantId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("BankResponseId");
 
                     b.HasIndex("CardId");
 
@@ -337,6 +362,10 @@ namespace PaymentGatewayApi.Migrations
 
             modelBuilder.Entity("PaymentGatewayApi.Models.PaymentDetails", b =>
                 {
+                    b.HasOne("PaymentGatewayApi.Models.BankResponse", "BankResponse")
+                        .WithMany()
+                        .HasForeignKey("BankResponseId");
+
                     b.HasOne("PaymentGatewayApi.Models.Card", "Card")
                         .WithMany()
                         .HasForeignKey("CardId");

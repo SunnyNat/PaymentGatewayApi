@@ -1,54 +1,75 @@
 ﻿using System;
-using System.Linq;
 using Newtonsoft.Json;
 using System.Net;
 using PaymentGatewayApi.DataLayer;
 using PaymentGatewayApi.Models.DTOs;
 using RestSharp;
 using PaymentGatewayApi.Models;
-using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace PaymentGatewayApi.Service
 {
     public class PaymentUtils
     {
-        private MyDbContext _context;
-        private PaymentMapper _paymentMapper;
+        private readonly IPaymentRepository repository;
+        private readonly IUnitOfWork unitOfWork;
+        private PaymentMapper paymentMapper;
 
-        public PaymentUtils(MyDbContext context)
+        public PaymentUtils(IPaymentRepository repository, IUnitOfWork unitOfWork)
         {
-            _context = context;
-            _paymentMapper = new PaymentMapper();
+            this.repository = repository;
+            this.unitOfWork = unitOfWork;
+            paymentMapper = new PaymentMapper();
         }
 
-        public PaymentDetailsDto GetPaymentDetails(string paymentIdentifier)
+        public async Task<PaymentDetailsDto> GetPaymentDetails(string paymentIdentifier, Merchant currentUser)
         {
-            PaymentDetails payment = _context.PaymentDetails.Where(p => p.Identifier == paymentIdentifier).FirstOrDefault();
+            PaymentDetails payment = await repository.GetPaymentDetails(paymentIdentifier, currentUser);
+            
+            if (payment == null) return null;
 
-            PaymentDetailsDto paymentDto = _paymentMapper.MapToPaymentDetailsDto(payment);
+            PaymentDetailsDto paymentDto = paymentMapper.MapToPaymentDetailsDto(payment);
 
             return paymentDto;
         }
 
-        public BankResponseDto PostPayment(PaymentDetailsDto paymentDetailsDto, Merchant currentUser, string bankUrl)
+        public async Task<BankResponseDto> PostPayment(PaymentRequestDto paymentRequestDto, Merchant currentUser, string bankUrl)
         {
             BankResponseDto bankResponseDto = new BankResponseDto();
 
-            var response = CommunicationUtils.ConnectToBank($"{bankUrl}/Payment/Post", Method.POST, paymentDetailsDto);
+            var response = CommunicationUtils.ConnectToBank($"{bankUrl}/payment", Method.POST, paymentRequestDto);
 
             if (response.ResponseStatus == ResponseStatus.Completed && response.StatusCode == HttpStatusCode.OK)
             {
                 bankResponseDto = JsonConvert.DeserializeObject<BankResponseDto>(response.Content);
-                paymentDetailsDto.BankResponse = bankResponseDto;
-
-                PaymentDetails paymentDetails = _paymentMapper.MapToPaymentDetails(paymentDetailsDto);
-                paymentDetails.Merchant = currentUser;
-
-                _context.PaymentDetails.Add(paymentDetails);
+                
+                await SavePaymentDetails(paymentRequestDto, bankResponseDto, currentUser);
             }
 
             return bankResponseDto;
+        }
+
+        private async Task SavePaymentDetails(PaymentRequestDto paymentRequestDto, BankResponseDto bankResponseDto, Merchant currentUser)
+        {
+            PaymentDetails paymentDetails = new PaymentDetails()
+            {
+                Identifier = bankResponseDto.Identifier,
+                Status = bankResponseDto.Status,
+                Amount = paymentRequestDto.Amount,
+                Card = new Card()
+                {
+                    CardNumber = paymentRequestDto.Card.CardNumber,
+                    Cvv = paymentRequestDto.Card.Cvv,
+                    ExpiryMonth = paymentRequestDto.Card.ExpiryMonth,
+                    ExpiryYear = paymentRequestDto.Card.ExpiryYear,
+                },
+                Currency = paymentRequestDto.Currency,
+                Merchant = currentUser,
+                Date = DateTime.Now
+            };
+
+            await repository.PostPaymentDetails(paymentDetails);
+            await unitOfWork.CompleteAsync();
         }
     }
 }

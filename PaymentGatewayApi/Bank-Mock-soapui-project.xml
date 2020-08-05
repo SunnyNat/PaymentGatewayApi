@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="24a20927-59df-4cb2-8394-673c880b229b" activeEnvironment="Default" name="Bank Mock" resourceRoot="" defaultScriptLanguage="Groovy" soapui-version="5.6.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:RestService" id="0ccdb1d3-6701-4198-adbe-24c2de8387b1" wadlVersion="http://wadl.dev.java.net/2009/02" name="http://localhost:8080" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache/><con:endpoints><con:endpoint>http://localhost:8080</con:endpoint></con:endpoints><con:resource name="Bankmock" path="/payment" id="72f4ea77-dd69-442a-b76a-bf7bee6e9540"><con:settings/><con:parameters/><con:method name="Bankmock 1" id="5bd66a7a-dd71-4bfd-9a9f-07f3ffdf5282" method="POST"><con:settings/><con:parameters/><con:representation type="REQUEST"><con:mediaType>application/json</con:mediaType><con:params/></con:representation><con:representation type="RESPONSE"><con:mediaType>application/json</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:request name="Request 1" id="ca357e6c-3217-4c5e-8818-5cacc0477f1a" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://localhost:8080</con:endpoint><con:request/><con:originalUri>http://localhost/payment</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource></con:interface><con:restMockService id="7e4cd0cf-d9e2-4cb3-8f13-f5ea6a107c76" port="8080" path="/" host="DESKTOP-LU23G81" name="REST BankMockService"><con:settings/><con:properties/><con:restMockAction name="payment" method="POST" resourcePath="/payment" id="e10b437c-5fd1-4b24-b88a-9cc76e44b1ed"><con:settings/><con:defaultResponse>Failed Payment Response</con:defaultResponse><con:dispatchStyle>SCRIPT</con:dispatchStyle><con:dispatchPath>def balance = 5000
+
+//generate random identifier
+def identifier = org.apache.commons.lang.RandomStringUtils.randomNumeric(8)
+
+
+//def requestBody = mockRequest.getRequestContent();
+//log.info "Request body: " + requestBody;
+
+//def paymentAmount = requestBody.Amount;
+//log.info paymentAmount
+
+def amount = new groovy.json.JsonSlurper().parseText(mockRequest.requestContent).Amount
+log.info "Amount is : ${amount}"
+
+if(amount&lt;balance)
+{
+	return "Successful Payment Response"
+}
+else
+{
+	return "Failed Payment Response"
+}
+
+
+
+/*&#13;
+// Script dispatcher is used to select a response based on the incoming request.&#13;
+// Here are few examples showing how to match based on path, query param, header and body&#13;
+&#13;
+// Match based on path&#13;
+def requestPath = mockRequest.getPath()&#13;
+log.info "Path: "+ requestPath&#13;
+&#13;
+if( requestPath.contains("json") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "JSON Response"&#13;
+}&#13;
+&#13;
+&#13;
+//Match based on query parameter&#13;
+def queryString = mockRequest.getRequest().getQueryString()&#13;
+log.info "QueryString: " + queryString&#13;
+&#13;
+if( queryString.contains("stockholm") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "Response Stockholm"&#13;
+}&#13;
+else if( queryString.contains("london") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "Response London"&#13;
+}&#13;
+&#13;
+&#13;
+// Match based on header&#13;
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")&#13;
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList&#13;
+&#13;
+if( acceptEncodingHeaderList.contains("gzip,deflate") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "GZiped Response"&#13;
+}&#13;
+&#13;
+&#13;
+// Match based on body&#13;
+def requestBody = mockRequest.getRequestContent()&#13;
+log.info "Request body: " + requestBody&#13;
+&#13;
+if( requestBody.contains("some data") )&#13;
+{&#13;
+    // return the name of the response you want to dispatch&#13;
+    return "Response N"&#13;
+}&#13;
+*/&#13;
+</con:dispatchPath><con:response name="Successful Payment Response" id="3f9f56c5-2401-4066-8b0f-9966abf3bde3" httpResponseStatus="200" mediaType="application/json"><con:settings/><con:script>import groovy.json.JsonOutput
+
+def identifier = org.apache.commons.lang.RandomStringUtils.randomNumeric(8)
+def status = "SUCCESS"
+
+def obj = [
+        identifier: identifier,
+        status: status
+]
+
+def json = new JsonOutput().toJson(obj)
+log.info json
+requestContext.responseMessage = json</con:script><con:responseContent>${responseMessage}</con:responseContent></con:response><con:response name="Failed Payment Response" id="ae5af2f5-427b-46f7-a8d3-dfbf479c57d8" httpResponseStatus="200" mediaType="application/json"><con:settings/><con:script>import groovy.json.JsonOutput
+
+def identifier = org.apache.commons.lang.RandomStringUtils.randomNumeric(8)
+def status = "FAILURE"
+
+def obj = [
+        identifier: identifier,
+        status: status
+]
+
+def json = new JsonOutput().toJson(obj)
+log.info json
+requestContext.responseMessage = json</con:script><con:responseContent>${responseMessage}</con:responseContent></con:response></con:restMockAction></con:restMockService><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/></con:soapui-project>

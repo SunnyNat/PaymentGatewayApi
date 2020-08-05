@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace PaymentGatewayApi.Models.DTOs
 {
     public class CardDto
     {
-        public long CardNumber { get; set; }
+        public string CardNumber { get; set; }
         public int ExpiryMonth { get; set; }
         public int ExpiryYear { get; set; }
-        public int CVV { get; set; }
+        public string Cvv { get; set; }
     }
 }

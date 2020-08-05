@@ -8,7 +8,7 @@ namespace PaymentGatewayApi.Models
         public int Id { get; set; }
 
         [StringLength(16)]
-        public long CardNumber { get; set; }
+        public string CardNumber { get; set; }
 
         [MinLength(1), MaxLength(2), Range(0, 12)]
         public int ExpiryMonth { get; set; }
@@ -17,6 +17,6 @@ namespace PaymentGatewayApi.Models
         public int ExpiryYear { get; set; }
 
         [StringLength(3)]
-        public int CVV { get; set; }
+        public string Cvv { get; set; }
     }
 }
