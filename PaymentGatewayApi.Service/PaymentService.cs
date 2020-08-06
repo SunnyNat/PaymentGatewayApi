@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace PaymentGatewayApi.Service
 {
-    public class PaymentUtils
+    public class PaymentService : IPaymentService
     {
         private readonly IPaymentRepository repository;
         private readonly IUnitOfWork unitOfWork;
         private PaymentMapper paymentMapper;
 
-        public PaymentUtils(IPaymentRepository repository, IUnitOfWork unitOfWork)
+        public PaymentService(IPaymentRepository repository, IUnitOfWork unitOfWork)
         {
             this.repository = repository;
             this.unitOfWork = unitOfWork;
@@ -25,7 +25,7 @@ namespace PaymentGatewayApi.Service
         public async Task<PaymentDetailsDto> GetPaymentDetails(string paymentIdentifier, Merchant currentUser)
         {
             PaymentDetails payment = await repository.GetPaymentDetails(paymentIdentifier, currentUser);
-            
+
             if (payment == null) return null;
 
             PaymentDetailsDto paymentDto = paymentMapper.MapToPaymentDetailsDto(payment);
@@ -42,7 +42,7 @@ namespace PaymentGatewayApi.Service
             if (response.ResponseStatus == ResponseStatus.Completed && response.StatusCode == HttpStatusCode.OK)
             {
                 bankResponseDto = JsonConvert.DeserializeObject<BankResponseDto>(response.Content);
-                
+
                 await SavePaymentDetails(paymentRequestDto, bankResponseDto, currentUser);
             }
 

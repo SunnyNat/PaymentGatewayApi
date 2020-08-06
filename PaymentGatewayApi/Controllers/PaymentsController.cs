@@ -20,14 +20,14 @@ namespace PaymentGatewayApi.Controllers
     public class PaymentsController : ControllerBase
     {
         private UserManager<Merchant> _userManager;
-        private PaymentUtils _paymentUtils;
+        private IPaymentService paymentService;
         private readonly IOptions<ApplicationSettings> _options;
 
-        public PaymentsController(UserManager<Merchant> userManager, IOptions<ApplicationSettings> options, IPaymentRepository repository, IUnitOfWork unitOfWork)
+        public PaymentsController(UserManager<Merchant> userManager, IOptions<ApplicationSettings> options, IPaymentService paymentService)
         {
             _userManager = userManager;
             _options = options;
-            _paymentUtils = new PaymentUtils(repository, unitOfWork);
+            this.paymentService = paymentService;
         }
 
         [HttpPost]
@@ -49,7 +49,7 @@ namespace PaymentGatewayApi.Controllers
             var currentUserName = currentUser.FindFirst("login").Value;
             var user = await _userManager.FindByNameAsync(currentUserName);
 
-            BankResponseDto bankResponseDto = await _paymentUtils.PostPayment(paymentRequestDto, user, _options.Value.BankUrl);
+            BankResponseDto bankResponseDto = await paymentService.PostPayment(paymentRequestDto, user, _options.Value.BankUrl);
 
             if (bankResponseDto != null)
             {
@@ -72,7 +72,7 @@ namespace PaymentGatewayApi.Controllers
             var currentUserName = currentUser.FindFirst("login").Value;
             var user = await _userManager.FindByNameAsync(currentUserName);
 
-            PaymentDetailsDto paymentDetailsDto = await _paymentUtils.GetPaymentDetails(paymentIdentifier, user);
+            PaymentDetailsDto paymentDetailsDto = await paymentService.GetPaymentDetails(paymentIdentifier, user);
 
             if (paymentDetailsDto != null)
             {

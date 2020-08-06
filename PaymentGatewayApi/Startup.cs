@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using PaymentGatewayApi.Controllers;
 using PaymentGatewayApi.DataLayer;
 using PaymentGatewayApi.Models;
+using PaymentGatewayApi.Service;
 using PaymentGatewayApi.SwaggerConfiguration;
 
 namespace PaymentGatewayApi
@@ -30,6 +31,7 @@ namespace PaymentGatewayApi
         {
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IPaymentService, PaymentService>();
             services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));
             services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
             services.AddControllers();
